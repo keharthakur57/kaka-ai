@@ -79,6 +79,7 @@ input[type=password],input[type=text]{width:100%;background:var(--card2);border:
   <div class="sub">Personal AI Operating System · Voice + Text</div>
   <div class="pinbox" id="pinbox"></div>
   <button class="btn" id="pinGo">Unlock</button>
+  <button class="btn ghost small" id="forgotPin" style="margin-top:14px">PIN bhool gaya?</button>
   <div id="loginMsg"></div>
 </div>
 
@@ -179,6 +180,13 @@ async function handlePin(){
 }
 function enter(){document.getElementById('login').classList.add('hidden');document.getElementById('loginMsg').textContent=''}
 document.getElementById('pinGo').addEventListener('click',handlePin);
+document.getElementById('forgotPin').addEventListener('click',function(){
+ const ok=confirm('PIN reset kar dein?\n\nTera pura data (tasks, history, Gemini key) waisa hi surakshit rahega. Sirf saved PIN ka hash delete hoga, taaki tu naya 6-digit PIN set kar sake.\n\nNote: ye browser-based app hai, isliye jo bhi is page ko tere phone pe kholega wo PIN reset kar sakta hai. Ye client-side app ki limitation hai.');
+ if(!ok)return;
+ localStorage.removeItem('kaka_pin_hash');
+ renderPins();
+ document.getElementById('loginMsg').textContent='PIN reset ho gaya. Ab naya 6-digit PIN daalo, yahi aage tera PIN banega. Data sab safe hai.';
+});
 
 /* ---- tabs ---- */
 document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>{
