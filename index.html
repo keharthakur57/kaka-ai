@@ -3,15 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>KAKA AI — Multi-Agent Intelligence Platform</title>
+<meta name="theme-color" content="#050a14">
+<link rel="manifest" href="manifest.json">
+<title>JARVIS · Personal AI Operating System</title>
 <style>
-:root{--bg:#0d0b14;--card:#171320;--card2:#1f1830;--line:#2c2340;--txt:#ece8f7;--dim:#9a90b8;--acc:#8b5cf6;--acc2:#a78bfa;--ok:#34d399;--warn:#f59e0b;--err:#f87171}
+:root{--bg:#050a14;--card:#0b1526;--card2:#122238;--line:#1d3a5f;--txt:#e9f2fc;--dim:#8fa9c7;--acc:#2ea8f5;--acc2:#7dd3fc;--ok:#34d399;--warn:#f59e0b;--err:#f87171}
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;min-height:100vh}
 .hidden{display:none!important}
 /* login */
 #login{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;padding:24px}
-#login .logo{font-size:44px;font-weight:800;letter-spacing:2px;background:linear-gradient(90deg,#8b5cf6,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent}
+#login .logo{font-size:44px;font-weight:800;letter-spacing:2px;background:linear-gradient(90deg,#2ea8f5,#7dd3fc);-webkit-background-clip:text;background-clip:text;color:transparent}
 #login .sub{color:var(--dim);margin:6px 0 28px;text-align:center}
 .pinbox{display:flex;gap:10px;justify-content:center;margin-bottom:18px}
 .pin{width:46px;height:56px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--txt);font-size:24px;text-align:center;outline:none}
@@ -22,8 +24,8 @@ body{background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,'
 .btn.small{padding:8px 14px;font-size:13px}
 #loginMsg{color:var(--err);min-height:20px;margin-top:10px;font-size:14px}
 /* header */
-header{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(13,11,20,.92);backdrop-filter:blur(8px);z-index:10}
-.hlogo{font-size:20px;font-weight:800;background:linear-gradient(90deg,#8b5cf6,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent}
+header{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(5,10,20,.92);backdrop-filter:blur(8px);z-index:10}
+.hlogo{font-size:20px;font-weight:800;background:linear-gradient(90deg,#2ea8f5,#7dd3fc);-webkit-background-clip:text;background-clip:text;color:transparent}
 nav{display:flex;gap:4px;margin-left:auto;overflow-x:auto}
 nav button{background:none;border:none;color:var(--dim);padding:8px 12px;font-size:14px;border-radius:8px;cursor:pointer;white-space:nowrap}
 nav button.active{color:var(--txt);background:var(--card2)}
@@ -37,7 +39,7 @@ textarea:focus{border-color:var(--acc)}
 .row{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
 .tag{font-size:12px;background:var(--card2);border:1px solid var(--line);color:var(--dim);padding:4px 10px;border-radius:999px}
 #finalBox{margin-top:16px}
-.answer{background:linear-gradient(135deg,rgba(139,92,246,.12),rgba(236,72,153,.08));border:1px solid var(--acc);border-radius:14px;padding:16px;white-space:pre-wrap;line-height:1.6;font-size:15px}
+.answer{background:linear-gradient(135deg,rgba(46,168,245,.12),rgba(125,211,252,.08));border:1px solid var(--acc);border-radius:14px;padding:16px;white-space:pre-wrap;line-height:1.6;font-size:15px}
 /* agents grid */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
 .agent{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
@@ -73,15 +75,15 @@ input[type=password],input[type=text]{width:100%;background:var(--card2);border:
 <body>
 
 <div id="login">
-  <div class="logo">KAKA AI</div>
-  <div class="sub">Multi-Agent Intelligence Platform</div>
+  <div class="logo">JARVIS</div>
+  <div class="sub">Personal AI Operating System · Voice + Text</div>
   <div class="pinbox" id="pinbox"></div>
   <button class="btn" id="pinGo">Unlock</button>
   <div id="loginMsg"></div>
 </div>
 
 <header>
-  <div class="hlogo">KAKA AI</div>
+  <div class="hlogo">JARVIS</div>
   <nav>
     <button data-tab="dash" class="active">Dashboard</button>
     <button data-tab="agents">Agents</button>
@@ -92,11 +94,12 @@ input[type=password],input[type=text]{width:100%;background:var(--card2);border:
 
 <main>
   <section id="tab-dash">
-    <h2>Apna task do, KAKA chunega aur chalayega</h2>
+    <h2>Apna task do, JARVIS chunega aur chalayega</h2>
     <div class="orb">
       <textarea id="taskInput" placeholder="Jaise: YouTube channel ke liye 10 topic ideas do, ya ye code ka bug theek karo..."></textarea>
       <div class="row">
-        <button class="btn" id="runBtn">KAKA chalao</button>
+        <button class="btn" id="runBtn">JARVIS chalao</button>
+        <button class="btn ghost" id="micBtn">🎙️ Bol ke bolo</button>
         <button class="btn ghost" id="clearBtn">Clear</button>
         <span class="tag" id="routeTag">router: waiting</span>
       </div>
@@ -104,6 +107,7 @@ input[type=password],input[type=text]{width:100%;background:var(--card2);border:
     <div id="finalBox" class="hidden">
       <h2>Final Answer</h2>
       <div class="answer" id="finalAnswer"></div>
+      <div class="row" style="margin-top:10px"><button class="btn ghost small" id="speakBtn">🔊 Suna do</button></div>
     </div>
   </section>
 
@@ -140,6 +144,7 @@ input[type=password],input[type=text]{width:100%;background:var(--card2);border:
       </div>
     </div>
   </section>
+  <p class="muted" style="text-align:center;margin:6px 0 18px">JARVIS v0.2 · base: KAKA AI · rollback: tag backup-kaka-ai-v1</p>
 </main>
 
 <div id="toast"></div>
@@ -247,8 +252,8 @@ async function runTask(){
  try{
   const jobs=r.list.map(async id=>{
    const a=AGENT_BY_ID[id];setStatus(id,'running','run');
-   let p='You are '+a.name+', a specialist agent inside KAKA AI, a multi-agent assistant. Work in Hindi/Hinglish if the user task is in Hindi. Your specialty: '+a.desc+'. User task: '+task+'\n\nGive a focused, practical answer in your specialty.';
-   if(id==='critic')p='You are the Critic agent of KAKA AI. Review this work by other agents against the user task and list concrete improvements or errors, then give a corrected version. User task: '+task+'\n\nWork to review:\n'+(outputs.__draft||'');
+   let p='You are '+a.name+', a specialist agent inside JARVIS, a multi-agent assistant. Work in Hindi/Hinglish if the user task is in Hindi. Your specialty: '+a.desc+'. User task: '+task+'\n\nGive a focused, practical answer in your specialty.';
+   if(id==='critic')p='You are the Critic agent of JARVIS. Review this work by other agents against the user task and list concrete improvements or errors, then give a corrected version. User task: '+task+'\n\nWork to review:\n'+(outputs.__draft||'');
    const res=await geminiCall(p,a.name);
    outputs[id]=res.text;used.push(a.name+' ('+res.model+')');
    setStatus(id,'done \u00B7 '+res.model,'done');showOut(id,res.text);
@@ -256,16 +261,16 @@ async function runTask(){
   });
   await Promise.all(jobs);
   if(r.orchestrated){
-   const synth=await geminiCall('You are KAKA, the chief orchestrator. Combine the specialist outputs below into ONE final, clear answer for the user task. Keep the best points, fix what the Critic flagged, no repetition. Reply in Hindi/Hinglish. User task: '+task+'\n\nSpecialist outputs:\n'+outputs.__draft+'\n\nCritic notes:\n'+(outputs.critic||''));
+   const synth=await geminiCall('You are JARVIS, the chief orchestrator. Combine the specialist outputs below into ONE final, clear answer for the user task. Keep the best points, fix what the Critic flagged, no repetition. Reply in Hindi/Hinglish. User task: '+task+'\n\nSpecialist outputs:\n'+outputs.__draft+'\n\nCritic notes:\n'+(outputs.critic||''));
    document.getElementById('finalAnswer').textContent=synth.text;
-   used.push('KAKA synth ('+synth.model+')');
+   used.push('JARVIS synth ('+synth.model+')');
   }else{
    document.getElementById('finalAnswer').textContent=outputs[r.list[0]];
   }
   document.getElementById('finalBox').classList.remove('hidden');
   saveTask({ts:Date.now(),task:task,route:r.orchestrated?'orchestrated':'direct',agents:r.list,answer:(document.getElementById('finalAnswer').textContent||'').slice(0,6000)});
  }catch(e){toast(e.message);document.getElementById('routeTag').textContent='router: error'}
- running=false;document.getElementById('runBtn').textContent='KAKA chalao';
+ running=false;document.getElementById('runBtn').textContent='JARVIS chalao';
 }
 document.getElementById('runBtn').addEventListener('click',runTask);
 document.getElementById('clearBtn').addEventListener('click',()=>{document.getElementById('taskInput').value='';document.getElementById('finalBox').classList.add('hidden');document.getElementById('routeTag').textContent='router: waiting'});
@@ -291,17 +296,32 @@ document.getElementById('saveKey').addEventListener('click',()=>{const v=documen
 document.getElementById('savePin').addEventListener('click',async()=>{const v=document.getElementById('pinNew').value.trim();if(v.length!==6){toast('6-digit PIN do');return}localStorage.setItem('kaka_pin_hash',await sha(v));document.getElementById('pinNew').value='';toast('PIN badal gaya')});
 document.getElementById('backupBtn').addEventListener('click',()=>{
  const blob=new Blob([JSON.stringify({tasks:getTasks(),exported:new Date().toISOString()},null,2)],{type:'application/json'});
- const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='kaka-backup-'+Date.now()+'.json';a.click();toast('Backup download ho gaya')});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='jarvis-backup-'+Date.now()+'.json';a.click();toast('Backup download ho gaya')});
 document.getElementById('restoreBtn').addEventListener('click',()=>document.getElementById('restoreFile').click());
 document.getElementById('restoreFile').addEventListener('change',e=>{
  const f=e.target.files[0];if(!f)return;const r=new FileReader();
  r.onload=()=>{try{const d=JSON.parse(r.result);if(Array.isArray(d.tasks)){localStorage.setItem('kaka_tasks',JSON.stringify(d.tasks));renderTasks();toast('Restore ho gaya')}else toast('Sahi backup file nahi')}catch(x){toast('File padhi nahi ja rahi')}};
  r.readAsText(f)});
 
+/* ---- Voice input + TTS (JARVIS v0.2) ---- */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const micBtn=document.getElementById('micBtn');
+let rec=null,listening=false;
+function setMic(on){listening=on;micBtn.textContent=on?'\u{1F534} Sun raha hoon... tap karke roko':'\u{1F399} Bol ke bolo'}
+if(SR){rec=new SR();rec.lang='hi-IN';rec.interimResults=true;rec.continuous=false;
+rec.onresult=function(e){let fin='',inter='';for(let i=0;i<e.results.length;i++){const r=e.results[i];if(r.isFinal)fin+=r[0].transcript;else inter+=r[0].transcript}
+ document.getElementById('taskInput').value=(fin||inter).trim()};
+rec.onend=function(){setMic(false)};
+rec.onerror=function(e){setMic(false);if(e.error!=='aborted')toast('Voice me dikkat: '+e.error)};
+micBtn.addEventListener('click',function(){if(listening){rec.stop();return}try{rec.start();setMic(true)}catch(err){setMic(false);toast('Mic turant start nahi hua, phir try karo')}});
+}else{micBtn.textContent='\u{1F399} Voice: Chrome me kholo';micBtn.addEventListener('click',function(){toast('Voice input Chrome browser me chalta hai')})}
+document.getElementById('speakBtn').addEventListener('click',function(){const t=document.getElementById('finalAnswer').textContent;if(!t)return;if(!('speechSynthesis' in window)){toast('Speaker is browser me support nahi');return}const u=new SpeechSynthesisUtterance(t.slice(0,1200));const vs=speechSynthesis.getVoices();const v=vs.find(function(x){return /^hi/i.test(x.lang)})||vs[0];if(v){u.voice=v;u.lang=v.lang}else{u.lang='hi-IN'}speechSynthesis.speak(u)});
+
 /* init */
 const savedHash=localStorage.getItem('kaka_pin_hash');
 renderPins();
 if(!savedHash)document.getElementById('loginMsg').textContent='Pehli baar: koi bhi 6-digit PIN daalo, wahi PIN banega';
+if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(){})})}
 </script>
 </body>
 </html>
