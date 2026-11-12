@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#04070f">
+<link rel="manifest" href="manifest.json">
+<title>JARVIS · Personal AI Operating System</title>
+<style>
+
+:root{--bg:#04070f;--card:#0a1322;--card2:#101d33;--line:#1c3050;--txt:#e9f2fc;--dim:#8ba6c9;--acc:#2ea8f5;--acc2:#a78bfa;--ok:#34d399;--warn:#f59e0b;--err:#f87171}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;min-height:100vh}
+.hidden{display:none!important}
+/* login */
+#login{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:50;padding:24px}
+#login .logo{font-size:44px;font-weight:800;letter-spacing:2px;background:linear-gradient(90deg,#38bdf8,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent}
+#login .sub{color:var(--dim);margin:6px 0 28px;text-align:center}
+.pinbox{display:flex;gap:10px;justify-content:center;margin-bottom:18px}
+.pin{width:46px;height:56px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--txt);font-size:24px;text-align:center;outline:none}
+.pin:focus{border-color:var(--acc)}
+.btn{background:var(--acc);color:#fff;border:none;border-radius:10px;padding:12px 22px;font-size:15px;font-weight:600;cursor:pointer}
+.btn:active{transform:scale(.98)}
+.btn.ghost{background:var(--card2);color:var(--acc2);border:1px solid var(--line)}
+.btn.small{padding:8px 14px;font-size:13px}
+#loginMsg{color:var(--err);min-height:20px;margin-top:10px;font-size:14px}
+/* header */
+header{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(5,10,20,.92);backdrop-filter:blur(8px);z-index:10}
+.hlogo{font-size:20px;font-weight:800;background:linear-gradient(90deg,#38bdf8,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent}
+nav{display:flex;gap:4px;margin-left:auto;overflow-x:auto}
+nav button{background:none;border:none;color:var(--dim);padding:8px 12px;font-size:14px;border-radius:8px;cursor:pointer;white-space:nowrap}
+nav button.active{color:var(--txt);background:var(--card2)}
+main{max-width:960px;margin:0 auto;padding:18px}
+h2{font-size:18px;margin:6px 0 14px}
+.muted{color:var(--dim);font-size:13px}
+/* dashboard */
+.orb{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:16px}
+textarea{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:12px;font-size:15px;min-height:88px;resize:vertical;outline:none;font-family:inherit}
+textarea:focus{border-color:var(--acc)}
+.row{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.tag{font-size:12px;background:var(--card2);border:1px solid var(--line);color:var(--dim);padding:4px 10px;border-radius:999px}
+#finalBox{margin-top:16px}
+.answer{background:linear-gradient(135deg,rgba(46,168,245,.12),rgba(125,211,252,.08));border:1px solid var(--acc);border-radius:14px;padding:16px;white-space:pre-wrap;line-height:1.6;font-size:15px}
+/* agents grid */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.agent{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px}
+.agent .top{display:flex;align-items:center;gap:10px}
+.agent .ic{font-size:22px}
+.agent .nm{font-weight:700}
+.dot{width:9px;height:9px;border-radius:50%;background:#4b4258;margin-left:auto}
+.dot.run{background:var(--warn);animation:pulse 1s infinite}
+.dot.done{background:var(--ok)}
+@keyframes pulse{50%{opacity:.4}}
+.agent .ds{color:var(--dim);font-size:12.5px;margin-top:8px;line-height:1.5}
+.agent .st{color:var(--dim);font-size:11.5px;margin-top:8px;min-height:15px}
+.out{margin-top:10px;background:var(--card2);border-radius:10px;padding:10px;font-size:13px;white-space:pre-wrap;max-height:260px;overflow:auto;line-height:1.5;display:none}
+/* tasks */
+.task{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px}
+.task .t1{display:flex;justify-content:space-between;gap:10px;font-size:14px}
+.task .tt{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.task .tm{color:var(--dim);font-size:12px;white-space:nowrap}
+.task .tg{color:var(--dim);font-size:12px;margin-top:4px}
+details{margin-top:8px}
+details summary{color:var(--acc2);cursor:pointer;font-size:13px}
+details .body{white-space:pre-wrap;font-size:13px;line-height:1.55;margin-top:8px;color:var(--txt)}
+/* settings */
+.set{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px}
+.set h3{font-size:14px;margin-bottom:10px}
+input[type=password],input[type=text]{width:100%;background:var(--card2);border:1px solid var(--line);border-radius:10px;color:var(--txt);padding:10px 12px;font-size:14px;outline:none}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--card2);border:1px solid var(--acc);color:var(--txt);padding:10px 18px;border-radius:10px;font-size:14px;z-index:60;opacity:0;transition:.3s;pointer-events:none}
+#toast.show{opacity:1}
+@media(max-width:560px){.grid{grid-template-columns:1fr 1fr}}
+@media(max-width:400px){.grid{grid-template-columns:1fr}}
+
+/* ===== JARVIS v0.3 dashboard ===== */
+#rail{position:fixed;left:0;top:0;bottom:0;width:212px;background:linear-gradient(180deg,#060b16,#04070f);border-right:1px solid var(--line);display:flex;flex-direction:column;padding:20px 14px;gap:8px;z-index:20}
+#rail .hlogo{font-size:22px;margin:0 0 18px}
+#railnav{display:flex;flex-direction:column;gap:6px}
+#railnav button{display:block;width:100%;text-align:left;background:none;border:1px solid transparent;color:var(--dim);padding:11px 14px;font-size:14.5px;border-radius:10px;cursor:pointer}
+#railnav button:hover{color:var(--txt);background:var(--card2)}
+#railnav button.active{color:var(--txt);background:linear-gradient(90deg,rgba(46,168,245,.16),rgba(167,139,250,.08));border-color:var(--line)}
+.railfoot{margin-top:auto}
+#topbar{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(4,7,15,.94);backdrop-filter:blur(8px);z-index:15}
+#bottomnav{position:fixed;left:0;right:0;bottom:0;display:flex;background:rgba(6,11,22,.97);border-top:1px solid var(--line);backdrop-filter:blur(10px);z-index:30;padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+#bottomnav button{flex:1;background:none;border:none;color:var(--dim);font-size:11px;padding:6px 2px;border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:2px}
+#bottomnav button .bi{font-size:18px;line-height:1}
+#bottomnav button.active{color:var(--acc)}
+@media(max-width:899px){#rail{display:none}main{margin-left:0;padding-bottom:88px}}
+@media(min-width:900px){#topbar{display:none}#bottomnav{display:none}main{margin-left:212px;max-width:none;padding:24px 28px}}
+.dashhero{margin:4px 0 18px}
+.dashhero h1{font-size:24px;font-weight:800;letter-spacing:.3px}
+.dashgrid{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:stretch;margin-bottom:22px}
+@media(max-width:640px){.dashgrid{grid-template-columns:1fr}}
+.orbcard{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;min-width:230px}
+.orbstage{position:relative;width:150px;height:150px}
+.orb-core{position:absolute;inset:38px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#bfe9ff,#2ea8f5 55%,#0b4a86 100%);box-shadow:0 0 30px rgba(46,168,245,.45),0 0 70px rgba(46,168,245,.18);animation:corePulse 3.2s ease-in-out infinite}
+.orb-ring{position:absolute;border-radius:50%;border:1.5px solid transparent}
+.orb-ring.r1{inset:6px;border-top-color:#22d3ee;border-right-color:rgba(34,211,238,.25);animation:spin 7s linear infinite}
+.orb-ring.r2{inset:19px;border-top-color:rgba(167,139,250,.85);border-right-color:rgba(167,139,250,.2);animation:spin 12s linear infinite reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes corePulse{0%,100%{box-shadow:0 0 26px rgba(46,168,245,.35),0 0 60px rgba(46,168,245,.12)}50%{box-shadow:0 0 44px rgba(46,168,245,.6),0 0 92px rgba(167,139,250,.28)}}
+.orbstage.listening .orb-core,.orbstage.thinking .orb-core{animation-duration:1.4s}
+.wave{display:flex;gap:3px;align-items:flex-end;height:26px}
+.wave span{width:4px;height:9px;border-radius:3px;background:linear-gradient(180deg,#22d3ee,#2ea8f5);opacity:.22;transform:scaleY(.4);transform-origin:bottom}
+.wave.live span{opacity:.95;animation:wv 1s ease-in-out infinite;animation-delay:calc(var(--i)*.07s)}
+@keyframes wv{0%,100%{transform:scaleY(.35)}50%{transform:scaleY(1.6)}}
+.statepill{font-size:12px;color:var(--dim);background:var(--card2);border:1px solid var(--line);padding:4px 12px;border-radius:999px}
+.sumgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.sumcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;display:flex;flex-direction:column;gap:4px}
+.sv{font-size:22px;font-weight:800;color:var(--txt)}
+.sv.good{color:var(--ok)}.sv.warn{color:var(--warn)}.sv.acc{color:var(--acc)}
+.sk{font-size:12px;color:var(--dim)}
+.agrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;margin-bottom:22px}
+.agcard{position:relative;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;transition:border-color .2s,transform .2s}
+.agcard:hover{border-color:var(--acc);transform:translateY(-2px)}
+.agcard .top{display:flex;align-items:center;gap:10px}
+.aico{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px;background:linear-gradient(135deg,rgba(46,168,245,.18),rgba(167,139,250,.12));border:1px solid var(--line);animation:aicoGlow 4s ease-in-out infinite}
+@keyframes aicoGlow{0%,100%{box-shadow:0 0 0 rgba(46,168,245,0)}50%{box-shadow:0 0 14px rgba(46,168,245,.35)}}
+.agcard .nm{font-weight:700;font-size:14px}
+.chiprow{margin-top:8px}
+.chip{font-size:10.5px;font-weight:700;letter-spacing:.5px;padding:3px 8px;border-radius:999px}
+.chip.working{background:rgba(52,211,153,.14);color:var(--ok);border:1px solid rgba(52,211,153,.4)}
+.chip.review{background:rgba(245,158,11,.12);color:var(--warn);border:1px solid rgba(245,158,11,.4)}
+.chip.basic{background:rgba(46,168,245,.12);color:var(--acc);border:1px solid rgba(46,168,245,.4)}
+.chip.planned{background:rgba(167,139,250,.1);color:var(--acc2);border:1px solid rgba(167,139,250,.35)}
+.agcard .ds{color:var(--dim);font-size:12px;margin-top:8px;line-height:1.5}
+.ddot{position:absolute;top:14px;right:14px;width:9px;height:9px;border-radius:50%;background:#2a3a55}
+.ddot.run{background:var(--warn);animation:pulse 1s infinite}
+.ddot.done{background:var(--ok)}
+.agcard.running{border-color:var(--acc);box-shadow:0 0 18px rgba(46,168,245,.25)}
+.agcard.planned{opacity:.72;border-style:dashed}
+.qachips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:22px;-webkit-overflow-scrolling:touch}
+.qachips button{flex:0 0 auto;background:var(--card2);border:1px solid var(--line);color:var(--txt);font-size:12.5px;padding:8px 14px;border-radius:999px;cursor:pointer}
+.qachips button:active{transform:scale(.97)}
+.recent{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;gap:10px;cursor:pointer}
+.recent .rt{font-size:13.5px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recent .rm{color:var(--dim);font-size:11.5px;white-space:nowrap}
+.sdotok,.sdotwarn{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;vertical-align:middle}
+.sdotok{background:var(--ok)}.sdotwarn{background:var(--warn)}
+@media (prefers-reduced-motion: reduce){
+ *{animation:none!important;transition:none!important}
+ .wave span{transform:scaleY(.4);opacity:.3}
+ .wave.live span{animation:none;opacity:.5}
+}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="logo">JARVIS</div>
+  <div class="sub">Personal AI Operating System · Voice + Text</div>
+  <div class="pinbox" id="pinbox"></div>
+  <button class="btn" id="pinGo">Unlock</button>
+  <button class="btn ghost small" id="forgotPin" style="margin-top:14px">PIN bhool gaya?</button>
+  <div id="loginMsg"></div>
+</div>
+
+<aside id="rail">
+  <div class="hlogo">JARVIS</div>
+  <nav id="railnav">
+    <button data-tab="dash" class="active">⌂ Dashboard</button>
+    <button data-tab="agents">◉ Agents</button>
+    <button data-tab="tasks">≣ Tasks</button>
+    <button data-tab="settings">⚙ Settings</button>
+  </nav>
+  <div class="railfoot"><span class="tag" id="sysdotRail"></span><p class="muted">v0.3 · base: KAKA AI</p></div>
+</aside>
+<header id="topbar">
+  <div class="hlogo">JARVIS</div>
+  <span class="tag" id="sysdotTop"></span>
+</header>
+
+<main>
+  <section id="tab-dash">
+    <div class="dashhero">
+      <h1 id="greet">Hello, KAKU</h1>
+      <p class="muted" id="greetSub"></p>
+    </div>
+    <div class="dashgrid">
+      <div class="orbcard orb">
+        <div class="orbstage" id="orbStage">
+          <div class="orb-ring r1"></div>
+          <div class="orb-ring r2"></div>
+          <div class="orb-core"></div>
+        </div>
+        <div class="wave" id="wave"><span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span><span style="--i:4"></span><span style="--i:5"></span><span style="--i:6"></span><span style="--i:7"></span><span style="--i:8"></span><span style="--i:9"></span><span style="--i:10"></span><span style="--i:11"></span><span style="--i:12"></span><span style="--i:13"></span><span style="--i:14"></span><span style="--i:15"></span></div>
+        <div class="statepill" id="statePill">Idle</div>
+      </div>
+      <div class="sumgrid">
+        <div class="sumcard"><span class="sv acc" id="sumAgents">0</span><span class="sk">Agents active (live)</span></div>
+        <div class="sumcard"><span class="sv" id="sumTasks">0</span><span class="sk">Tasks saved</span></div>
+        <div class="sumcard"><span class="sv" id="sumKey">-</span><span class="sk">Gemini key</span></div>
+        <div class="sumcard"><span class="sv" id="sumVoice">-</span><span class="sk">Voice support</span></div>
+      </div>
+    </div>
+    <h2>Specialist Agents</h2>
+    <p class="muted">Live dot sirf tab chalta hai jab agent sach me kaam kar raha ho. PLANNED matlab abhi built nahi hai.</p>
+    <div class="agrid" id="dashAgents"></div>
+    <h2>Voice &amp; Text Command</h2>
+    <div class="orb">
+      <textarea id="taskInput" placeholder="Jaise: YouTube channel ke liye 10 topic ideas do, ya ye code ka bug theek karo..."></textarea>
+      <div class="row">
+        <button class="btn" id="runBtn">JARVIS chalao</button>
+        <button class="btn ghost" id="micBtn">🎙️ Bol ke bolo</button>
+        <button class="btn ghost" id="clearBtn">Clear</button>
+        <span class="tag" id="routeTag">router: waiting</span>
+      </div>
+    </div>
+    <div id="finalBox" class="hidden">
+      <h2>Final Answer</h2>
+      <div class="answer" id="finalAnswer"></div>
+      <div class="row" style="margin-top:10px"><button class="btn ghost small" id="speakBtn">🔊 Suna do</button></div>
+    </div>
+    <h2>Quick Actions</h2>
+    <div class="qachips" id="qaChips"></div>
+    <h2>Recent Activity</h2>
+    <div id="recentList"></div>
+    <p class="muted" id="emptyRecent">Abhi koi activity nahi — pehla command do.</p>
+  </section>
+
+  <section id="tab-agents" class="hidden">
+    <h2>Core Engines (8)</h2>
+    <p class="muted">Ye working internals hain. Dashboard pe JARVIS ke 6 specialist agents apne real status ke saath dikhte hain.</p>
+    <div class="grid" id="agentGrid"></div>
+  </section>
+
+  <section id="tab-tasks" class="hidden">
+    <h2>Task History</h2>
+    <div id="taskList"></div>
+    <p class="muted" id="emptyTasks">Abhi tak koi task nahi chala.</p>
+  </section>
+
+  <section id="tab-settings" class="hidden">
+    <div class="set">
+      <h3>Gemini API Key</h3>
+      <input type="password" id="apiKey" placeholder="aistudio.google.com/apikey se key lo">
+      <div class="row"><button class="btn small" id="saveKey">Save key</button><span class="muted">Key sirf tere browser me rehti hai, code me nahi.</span></div>
+    </div>
+    <div class="set">
+      <h3>PIN badlo</h3>
+      <div class="row" style="margin-top:0">
+        <input type="password" id="pinNew" placeholder="Naya 6-digit PIN" style="max-width:200px" maxlength="6" inputmode="numeric">
+        <button class="btn small" id="savePin">Save PIN</button>
+      </div>
+    </div>
+    <div class="set">
+      <h3>Backup &amp; Restore</h3>
+      <div class="row" style="margin-top:0">
+        <button class="btn ghost small" id="backupBtn">Backup JSON download</button>
+        <input type="file" id="restoreFile" accept=".json" class="hidden">
+        <button class="btn ghost small" id="restoreBtn">Restore JSON</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<nav id="bottomnav">
+  <button data-tab="dash" class="active"><span class="bi">⌂</span>Home</button>
+  <button data-tab="agents"><span class="bi">◉</span>Agents</button>
+  <button data-tab="tasks"><span class="bi">≣</span>Tasks</button>
+  <button data-tab="settings"><span class="bi">⚙</span>Settings</button>
+</nav>
+
+<div id="toast"></div>
+
+<script>
+
+const MODELS=['gemini-3.8-flash','gemini-3.6-flash','gemini-3.5-flash-lite','gemini-3.1-flash-lite'];
+const AGENTS=[
+ {id:'research',name:'Research',icon:'\uD83D\uDD0D',desc:'Facts, data aur latest jaankari nikalta hai'},
+ {id:'planning',name:'Planning',icon:'\uD83D\uDDFA\uFE0F',desc:'Roadmap aur step-by-step plan banata hai'},
+ {id:'coding',name:'Coding',icon:'\uD83D\uDCBB',desc:'Code likhna, review aur debug karna'},
+ {id:'business',name:'Business',icon:'\uD83D\uDCC8',desc:'Strategy, pricing aur growth sochta hai'},
+ {id:'logic',name:'Logic',icon:'\uD83E\uDDEE',desc:'Analysis, math aur tight reasoning'},
+ {id:'critic',name:'Critic',icon:'\uD83E\uDDD0',desc:'Sab outputs check karke kami pakadta hai'},
+ {id:'creative',name:'Creative',icon:'\uD83C\uDFA8',desc:'Naye ideas, scripts aur design'},
+ {id:'execution',name:'Execution',icon:'\u26A1',desc:'Concrete action steps aur checklist'}
+];
+const AGENT_BY_ID={};AGENTS.forEach(a=>AGENT_BY_ID[a.id]=a);
+
+function sha(s){return crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)).then(b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join(''))}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200)}
+function esc(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
+
+/* ---- PIN ---- */
+let pinBuf='';
+function renderPins(){const box=document.getElementById('pinbox');box.innerHTML='';for(let i=0;i<6;i++){const inp=document.createElement('input');inp.className='pin';inp.maxLength=1;inp.inputMode='numeric';inp.dataset.i=i;inp.addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'');if(e.target.value&&i<5)box.children[i+1].focus()});inp.addEventListener('keydown',e=>{if(e.key==='Backspace'&&!e.target.value&&i>0)box.children[i-1].focus()});box.appendChild(inp)}box.children[0].focus()}
+async function handlePin(){
+ const box=document.getElementById('pinbox');let v='';for(const c of box.children)v+=c.value;
+ if(v.length<6){document.getElementById('loginMsg').textContent='Poora 6-digit PIN daalo';return}
+ const h=await sha(v);const saved=localStorage.getItem('kaka_pin_hash');
+ if(!saved){localStorage.setItem('kaka_pin_hash',h);enter();return}
+ if(h===saved){enter()}else{document.getElementById('loginMsg').textContent='Galat PIN, phir se try karo';renderPins()}
+}
+function enter(){document.getElementById('login').classList.add('hidden');document.getElementById('loginMsg').textContent=''}
+document.getElementById('pinGo').addEventListener('click',handlePin);
+document.getElementById('forgotPin').addEventListener('click',function(){
+ const ok=confirm('PIN reset kar dein?\n\nTera pura data (tasks, history, Gemini key) waisa hi surakshit rahega. Sirf saved PIN ka hash delete hoga, taaki tu naya 6-digit PIN set kar sake.\n\nNote: ye browser-based app hai, isliye jo bhi is page ko tere phone pe kholega wo PIN reset kar sakta hai. Ye client-side app ki limitation hai.');
+ if(!ok)return;
+ localStorage.removeItem('kaka_pin_hash');
+ renderPins();
+ document.getElementById('loginMsg').textContent='PIN reset ho gaya. Ab naya 6-digit PIN daalo, yahi aage tera PIN banega. Data sab safe hai.';
+});
+
+/* ---- tabs ---- */
+document.querySelectorAll('nav button').forEach(b=>b.addEventListener('click',()=>{
+ const t=b.dataset.tab;
+ document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x.dataset.tab===t));
+ ['dash','agents','tasks','settings'].forEach(k=>document.getElementById('tab-'+k).classList.toggle('hidden',k!==t));
+ if(t==='tasks')renderTasks();
+ if(t==='dash')renderDash();
+}));
+
+/* ---- agents UI ---- */
+const grid=document.getElementById('agentGrid');
+AGENTS.forEach(a=>{
+ const d=document.createElement('div');d.className='agent';d.id='ag-'+a.id;
+ d.innerHTML='<div class="top"><span class="ic">'+a.icon+'</span><span class="nm">'+a.name+'</span><span class="dot" id="dot-'+a.id+'"></span></div><div class="ds">'+a.desc+'</div><div class="st" id="st-'+a.id+'"></div><div class="out" id="out-'+a.id+'"></div>';
+ grid.appendChild(d);
+});
+function setStatus(id,txt,cls){const d=document.getElementById('dot-'+id);d.className='dot'+(cls?' '+cls:'');document.getElementById('st-'+id).textContent=txt||'';uiDot(id,cls)}
+function showOut(id,txt){const o=document.getElementById('out-'+id);o.textContent=txt;o.style.display='block'}
+
+/* ---- Gemini ---- */
+async function geminiCall(prompt,agentName){
+ const key=localStorage.getItem('kaka_api_key');
+ if(!key)throw new Error('Settings me Gemini API key daalo');
+ let lastErr='';
+ for(const m of MODELS){
+  try{
+   const r=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+m+':generateContent?key='+encodeURIComponent(key),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})});
+   if(!r.ok){const e=await r.text();lastErr=m+': '+r.status;continue}
+   const d=await r.json();
+   const t=(d.candidates&&d.candidates[0]&&d.candidates[0].content&&d.candidates[0].content.parts||[]).map(p=>p.text||'').join('');
+   if(t)return{ text:t, model:m };
+   lastErr=m+': empty response';
+  }catch(e){lastErr=m+': '+e.message}
+ }
+ throw new Error('Sare models fail hue ('+lastErr+')');
+}
+
+/* ---- Router ---- */
+const KEY_MAP=[
+ {id:'research',kw:['research','jaankari','latest','news','fact','data','kya hai','compare']},
+ {id:'coding',kw:['code','bug','app','website','function','javascript','python','error','deploy']},
+ {id:'business',kw:['business','strategy','pricing','growth','marketing','channel','revenue','idea']},
+ {id:'logic',kw:['analyze','math','reason','logic','calculate','why','kaise soche']},
+ {id:'creative',kw:['creative','script','story','design','thumbnail','title','caption','naam']},
+ {id:'planning',kw:['plan','roadmap','schedule','step','list bana','organize']}
+];
+function pickAgents(task){
+ const t=task.toLowerCase();const picked=new Set();
+ KEY_MAP.forEach(g=>{if(g.kw.some(k=>t.includes(k)))picked.add(g.id)});
+ if(picked.size===0)picked.add('logic');
+ let complex=/plan|strategy|project|full|complete|complete karo|poora|business|channel/i.test(t)||task.length>90;
+ if(picked.size===1&&complex)picked.add('planning');
+ const list=[...picked].slice(0,3);
+ if(list.length>=2)list.push('critic');
+ return{list:list.slice(0,4),complex:complex&&list.length>=2,orchestrated:list.length>=2};
+}
+
+/* ---- Run ---- */
+let running=false;
+async function runTask(){
+ if(running)return;
+ const task=document.getElementById('taskInput').value.trim();
+ if(!task){toast('Pehle task likho');return}
+ if(!localStorage.getItem('kaka_api_key')){toast('Settings me Gemini API key pehle daalo');document.querySelector('nav button[data-tab=settings]').click();return}
+ running=true;document.getElementById('runBtn').textContent='Chal raha hai...';
+ runOn=true;updateOrb();
+ document.getElementById('finalBox').classList.add('hidden');
+ AGENTS.forEach(a=>setStatus(a.id,'',''));
+ AGENTS.forEach(a=>{document.getElementById('out-'+a.id).style.display='none';document.getElementById('out-'+a.id).textContent=''});
+ const r=pickAgents(task);
+ document.getElementById('routeTag').textContent=r.orchestrated?('router: orchestrated ('+r.list.map(i=>AGENT_BY_ID[i].name).join(' + ')+')'):('router: direct ('+AGENT_BY_ID[r.list[0]].name+')');
+ const outputs={};let used=[];
+ try{
+  const jobs=r.list.map(async id=>{
+   const a=AGENT_BY_ID[id];setStatus(id,'running','run');
+   let p='You are '+a.name+', a specialist agent inside JARVIS, a multi-agent assistant. Work in Hindi/Hinglish if the user task is in Hindi. Your specialty: '+a.desc+'. User task: '+task+'\n\nGive a focused, practical answer in your specialty.';
+   if(id==='critic')p='You are the Critic agent of JARVIS. Review this work by other agents against the user task and list concrete improvements or errors, then give a corrected version. User task: '+task+'\n\nWork to review:\n'+(outputs.__draft||'');
+   const res=await geminiCall(p,a.name);
+   outputs[id]=res.text;used.push(a.name+' ('+res.model+')');
+   setStatus(id,'done \u00B7 '+res.model,'done');showOut(id,res.text);
+   if(r.orchestrated&&!outputs.__draft)outputs.__draft=r.list.filter(x=>x!=='critic').map(x=>AGENT_BY_ID[x].name+':\n'+(outputs[x]||'')).join('\n\n');
+  });
+  await Promise.all(jobs);
+  if(r.orchestrated){
+   const synth=await geminiCall('You are JARVIS, the chief orchestrator. Combine the specialist outputs below into ONE final, clear answer for the user task. Keep the best points, fix what the Critic flagged, no repetition. Reply in Hindi/Hinglish. User task: '+task+'\n\nSpecialist outputs:\n'+outputs.__draft+'\n\nCritic notes:\n'+(outputs.critic||''));
+   document.getElementById('finalAnswer').textContent=synth.text;
+   used.push('JARVIS synth ('+synth.model+')');
+  }else{
+   document.getElementById('finalAnswer').textContent=outputs[r.list[0]];
+  }
+  document.getElementById('finalBox').classList.remove('hidden');
+  saveTask({ts:Date.now(),task:task,route:r.orchestrated?'orchestrated':'direct',agents:r.list,answer:(document.getElementById('finalAnswer').textContent||'').slice(0,6000)});
+ }catch(e){toast(e.message);document.getElementById('routeTag').textContent='router: error'}
+ runOn=false;updateOrb();running=false;document.getElementById('runBtn').textContent='JARVIS chalao';
+}
+document.getElementById('runBtn').addEventListener('click',runTask);
+document.getElementById('clearBtn').addEventListener('click',()=>{document.getElementById('taskInput').value='';document.getElementById('finalBox').classList.add('hidden');document.getElementById('routeTag').textContent='router: waiting'});
+
+/* ---- history ---- */
+function getTasks(){try{return JSON.parse(localStorage.getItem('kaka_tasks')||'[]')}catch(e){return[]}}
+function saveTask(t){const a=getTasks();a.unshift(t);localStorage.setItem('kaka_tasks',JSON.stringify(a.slice(0,200)));if(typeof renderRecent==='function')renderRecent();if(typeof renderSum==='function')renderSum()}
+function renderTasks(){
+ const a=getTasks(),el=document.getElementById('taskList');
+ document.getElementById('emptyTasks').style.display=a.length?'none':'block';
+ el.innerHTML='';
+ a.forEach((t,i)=>{
+  const d=document.createElement('div');d.className='task';
+  const dt=new Date(t.ts);const when=dt.toLocaleDateString('hi-IN')+' '+dt.toLocaleTimeString('hi-IN',{hour:'2-digit',minute:'2-digit'});
+  d.innerHTML='<div class="t1"><span class="tt">'+esc(t.task)+'</span><span class="tm">'+when+'</span></div><div class="tg">'+t.route+' \u00B7 '+t.agents.map(x=>AGENT_BY_ID[x]?AGENT_BY_ID[x].name:x).join(', ')+'</div><details><summary>Answer dekho</summary><div class="body">'+esc(t.answer)+'</div></details>';
+  el.appendChild(d);
+ });
+}
+
+/* ---- settings ---- */
+document.getElementById('apiKey').value=localStorage.getItem('kaka_api_key')||'';
+document.getElementById('saveKey').addEventListener('click',()=>{const v=document.getElementById('apiKey').value.trim();if(v){localStorage.setItem('kaka_api_key',v);toast('Key save ho gayi')}});
+document.getElementById('savePin').addEventListener('click',async()=>{const v=document.getElementById('pinNew').value.trim();if(v.length!==6){toast('6-digit PIN do');return}localStorage.setItem('kaka_pin_hash',await sha(v));document.getElementById('pinNew').value='';toast('PIN badal gaya')});
+document.getElementById('backupBtn').addEventListener('click',()=>{
+ const blob=new Blob([JSON.stringify({tasks:getTasks(),exported:new Date().toISOString()},null,2)],{type:'application/json'});
+ const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='jarvis-backup-'+Date.now()+'.json';a.click();toast('Backup download ho gaya')});
+document.getElementById('restoreBtn').addEventListener('click',()=>document.getElementById('restoreFile').click());
+document.getElementById('restoreFile').addEventListener('change',e=>{
+ const f=e.target.files[0];if(!f)return;const r=new FileReader();
+ r.onload=()=>{try{const d=JSON.parse(r.result);if(Array.isArray(d.tasks)){localStorage.setItem('kaka_tasks',JSON.stringify(d.tasks));renderTasks();toast('Restore ho gaya')}else toast('Sahi backup file nahi')}catch(x){toast('File padhi nahi ja rahi')}};
+ r.readAsText(f)});
+
+/* ---- Voice input + TTS (JARVIS v0.3) ---- */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+const micBtn=document.getElementById('micBtn');
+let rec=null,listening=false;
+function setMic(on){listening=on;micBtn.textContent=on?'\u{1F534} Sun raha hoon... tap karke roko':'\u{1F399} Bol ke bolo';micOn=on;if(typeof updateOrb==='function')updateOrb()}
+if(SR){rec=new SR();rec.lang='hi-IN';rec.interimResults=true;rec.continuous=false;
+rec.onresult=function(e){let fin='',inter='';for(let i=0;i<e.results.length;i++){const r=e.results[i];if(r.isFinal)fin+=r[0].transcript;else inter+=r[0].transcript}
+ document.getElementById('taskInput').value=(fin||inter).trim()};
+rec.onend=function(){setMic(false)};
+rec.onerror=function(e){setMic(false);if(e.error!=='aborted')toast('Voice me dikkat: '+e.error)};
+micBtn.addEventListener('click',function(){if(listening){rec.stop();return}try{rec.start();setMic(true)}catch(err){setMic(false);toast('Mic turant start nahi hua, phir try karo')}});
+}else{micBtn.textContent='\u{1F399} Voice: Chrome me kholo';micBtn.addEventListener('click',function(){toast('Voice input Chrome browser me chalta hai')})}
+document.getElementById('speakBtn').addEventListener('click',function(){const t=document.getElementById('finalAnswer').textContent;if(!t)return;if(!('speechSynthesis' in window)){toast('Speaker is browser me support nahi');return}const u=new SpeechSynthesisUtterance(t.slice(0,1200));const vs=speechSynthesis.getVoices();const v=vs.find(function(x){return /^hi/i.test(x.lang)})||vs[0];if(v){u.voice=v;u.lang=v.lang}else{u.lang='hi-IN'}speechSynthesis.speak(u)});
+
+/* init */
+const savedHash=localStorage.getItem('kaka_pin_hash');
+renderPins();
+if(!savedHash)document.getElementById('loginMsg').textContent='Pehli baar: koi bhi 6-digit PIN daalo, wahi PIN banega';
+if('serviceWorker' in navigator){addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(){})})}
+
+/* ===== Dashboard layer (JARVIS v0.3): real state only, no fake activity ===== */
+const UI_AGENTS=[
+ {id:'research',name:'Research',icon:'\u{1F50D}',eng:['research'],status:'working',note:'Gemini-powered research aur summaries. Live web search agla step hai.'},
+ {id:'factcheck',name:'Fact-Checker',icon:'\u{1F6E1}\uFE0F',eng:['critic'],status:'review',note:'Review-only (LLM). Live verification with sources planned.'},
+ {id:'creator',name:'Creator',icon:'\u{1F3AC}',eng:['creative','business'],status:'working',note:'YouTube/Instagram ideas, scripts, titles, thumbnails via Gemini.'},
+ {id:'career',name:'Career',icon:'\u{1F4BC}',eng:[],status:'planned',note:'Job tracker + application desk. Fo integration ke saath banega.'},
+ {id:'manager',name:'Personal Manager',icon:'\u{1F5D3}\uFE0F',eng:['planning'],status:'basic',note:'Daily plans + reminders basic level pe chalte hain. Attendance sync planned.'},
+ {id:'finance',name:'Finance Planner',icon:'\u{1F4B0}',eng:[],status:'planned',note:'Manual expense tracking planned. Koi banking access nahi hoga.'}
+];
+const ENG_TO_UI={};UI_AGENTS.forEach(a=>a.eng.forEach(e=>{ENG_TO_UI[e]=a.id}));
+const RUNNING_UI=new Set();
+const CHIP={working:'WORKING',review:'REVIEW-ONLY',basic:'BASIC',planned:'PLANNED'};
+let micOn=false,runOn=false;
+function updateOrb(){
+ const s=micOn?'listening':runOn?'thinking':'idle';
+ const st=document.getElementById('orbStage'),wv=document.getElementById('wave'),p=document.getElementById('statePill');
+ if(st){st.classList.toggle('listening',s==='listening');st.classList.toggle('thinking',s==='thinking')}
+ if(wv)wv.classList.toggle('live',s!=='idle');
+ if(p)p.textContent=s==='idle'?'Idle':s==='listening'?'Listening\u2026':'Thinking\u2026';
+}
+function uiDot(engId,cls){
+ const ui=ENG_TO_UI[engId];if(!ui)return;
+ const d=document.getElementById('dmdot-'+ui.id);if(d)d.className='ddot'+(cls?' '+cls:'');
+ const c=document.getElementById('dcard-'+ui.id);if(c)c.classList.toggle('running',cls==='run');
+ if(cls==='run')RUNNING_UI.add(ui.id);else RUNNING_UI.delete(ui.id);
+ const sa=document.getElementById('sumAgents');if(sa)sa.textContent=String(RUNNING_UI.size);
+}
+function buildDash(){
+ const grid=document.getElementById('dashAgents');if(!grid)return;
+ const SAMPLES={
+  research:'Research: Gemini API free tier ke limits ke baare me jo tum jaante ho batao',
+  factcheck:'Fact check karo: "GitHub Pages public repos ke liye free hosting hai"',
+  creator:'YouTube channel ke liye 5 video ideas do aur ek ka script outline banao',
+  manager:'Aaj ka realistic plan banao: office 10 ghante, travel 2 ghante, study 45 min'
+ };
+ UI_AGENTS.forEach(a=>{
+  const d=document.createElement('div');
+  d.className='agcard'+(a.status==='planned'?' planned':'');d.id='dcard-'+a.id;
+  d.innerHTML='<div class="top"><span class="aico">'+a.icon+'</span><span class="nm">'+a.name+'</span></div><div class="chiprow"><span class="chip '+a.status+'">'+CHIP[a.status]+'</span></div><div class="ds">'+a.note+'</div><span class="ddot" id="dmdot-'+a.id+'"></span>';
+  d.addEventListener('click',()=>{
+   if(a.status==='planned'){toast(a.name+' agent abhi planned hai: '+a.note);return}
+   const ti=document.getElementById('taskInput');ti.value=SAMPLES[a.id]||a.name+' se madad chahiye';ti.focus();
+   toast('Sample task bhar diya — edit karke JARVIS chalao');
+  });
+  grid.appendChild(d);
+ });
+ const qa=document.getElementById('qaChips');
+ const QAS=[['\u{1F50D} Research','Research: '],['\u{1F6E1}\uFE0F Fact check','Fact check karo: '],['\u{1F3AC} Content idea','YouTube video idea do: '],['\u{1F5D3}\uFE0F Aaj ka plan','Aaj ka realistic plan banao'],['\u{1F4C5} Content calendar','Is hafte ka content calendar banao']];
+ QAS.forEach(q=>{
+  const b=document.createElement('button');b.textContent=q[0];
+  b.addEventListener('click',()=>{const ti=document.getElementById('taskInput');ti.value=q[1];ti.focus();toast('Command ready — JARVIS chalao dabao')});
+  qa.appendChild(b);
+ });
+}
+function renderSum(){
+ const st=document.getElementById('sumTasks');if(st)st.textContent=String(getTasks().length);
+ const k=document.getElementById('sumKey');if(k){const has=!!localStorage.getItem('kaka_api_key');k.textContent=has?'Connected':'Missing';k.className='sv '+(has?'good':'warn')}
+ const v=document.getElementById('sumVoice');if(v){const ok=!!(window.SpeechRecognition||window.webkitSpeechRecognition);v.textContent=ok?'Supported':'Limited';v.className='sv '+(ok?'good':'warn')}
+ const sa=document.getElementById('sumAgents');if(sa)sa.textContent=String(RUNNING_UI.size);
+}
+function renderRecent(){
+ const el=document.getElementById('recentList');if(!el)return;
+ const a=getTasks().slice(0,3),em=document.getElementById('emptyRecent');
+ if(em)em.style.display=a.length?'none':'block';
+ el.innerHTML='';
+ a.forEach(t=>{
+  const d=document.createElement('div');d.className='recent';
+  const dt=new Date(t.ts);const when=dt.toLocaleDateString('hi-IN')+' '+dt.toLocaleTimeString('hi-IN',{hour:'2-digit',minute:'2-digit'});
+  d.innerHTML='<span class="rt">'+esc(t.task)+'</span><span class="rm">'+when+'</span>';
+  d.addEventListener('click',()=>{const b=document.querySelector('nav button[data-tab=tasks]');if(b)b.click()});
+  el.appendChild(d);
+ });
+}
+function renderDash(){
+ const now=new Date(),h=now.getHours();
+ const g=h<12?'Good morning':h<17?'Good afternoon':'Good evening';
+ const gt=document.getElementById('greet');if(gt)gt.textContent=g+', KAKU';
+ const key=!!localStorage.getItem('kaka_api_key');
+ const gs=document.getElementById('greetSub');
+ if(gs)gs.textContent=now.toLocaleDateString('hi-IN',{weekday:'long',day:'numeric',month:'long'})+' \u00B7 '+(key?'System online':'Gemini key missing \u2014 Settings me add karo');
+ ['sysdotTop','sysdotRail'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=key?'<i class="sdotok"></i> Online':'<i class="sdotwarn"></i> Key missing'});
+ renderSum();renderRecent();
+}
+buildDash();
+renderDash();
+
+</script>
+<script>SKIPLOGIN_TEST:document.addEventListener("DOMContentLoaded",function(){var l=document.getElementById("login");if(l)l.classList.add("hidden")});</script>
+</body>
+</html>
